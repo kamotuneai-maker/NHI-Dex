@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="dashboard/public/logo.png" alt="NHI-Dex Logo" width="180" />
+  <img src="dashboard/public/NHI-Dex 2.png" alt="NHI-Dex Logo" width="180" />
 
   <h1>NHI-Dex</h1>
   <p><strong>Non-Human Identity detection, classification, and monitoring for AI agents running in Docker.</strong></p>
