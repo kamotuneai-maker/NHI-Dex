@@ -142,11 +142,11 @@ NHI-Dex ships with five demo agents that deliberately exhibit different risk pro
 
 | Agent | Tier | Alert | What it demonstrates |
 |-------|------|-------|----------------------|
-| `shadow-agent` | AT0 | 🔴 RED | No governance labels, unregistered, direct Claude API calls — classic Shadow AI |
-| `coding-agent` | AT4 | 🟡 YELLOW | GitHub token, code review tools, semi-autonomous |
-| `enterprise-agent` | AT5 | 🟢 GREEN | Fully registered, labeled, OAuth, HITL gate — the gold standard |
-| `client-facing-agent` | AT5 | 🔴 RED | Processes untrusted user input + has external communication → Trifecta violation |
-| `infra-agent` | AT6 | 🟡 YELLOW | AWS + Kubernetes access, can trigger email sends via MCP |
+| `shadow-agent` | AT0 | 🔴 RED    | No governance labels, unregistered, direct Claude API calls — classic Shadow AI |
+| `coding-agent` | AT4 | 🟡 YELLOW    | GitHub token, code review tools, semi-autonomous |
+| `enterprise-agent` | AT5 | 🟢 GREEN    | Fully registered, labeled, OAuth, HITL gate — the gold standard |
+| `client-facing-agent` | AT5 | 🔴 RED    | Processes untrusted user input + has external communication → Trifecta violation |
+| `infra-agent` | AT6 | 🟡 YELLOW    | AWS + Kubernetes access, can trigger email sends via MCP |
 
 ---
 
