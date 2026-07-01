@@ -1,0 +1,138 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: nhidex
+      POSTGRES_PASSWORD: nhidex-dev
+      POSTGRES_DB: nhidex
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nhidex"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - nhidex
+
+  engine:
+    build: ./engine
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_USER: nhidex
+      POSTGRES_PASSWORD: nhidex-dev
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: nhidex
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - nhidex
+
+  watcher:
+    build: ./watcher
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      engine:
+        condition: service_healthy
+    environment:
+      - ENGINE_URL=http://engine:8000
+    networks:
+      - nhidex
+
+  mcp-tools:
+    build: ./mcp-tools
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:3001/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - nhidex
+
+  agent-coding:
+    build: ./agents/coding-agent
+    env_file: .env
+    environment:
+      - MCP_TOOL_SERVER=http://mcp-tools:3001
+      - GITHUB_TOKEN=ghp-fake-token-for-demo
+    depends_on:
+      mcp-tools:
+        condition: service_healthy
+    networks:
+      - nhidex
+
+  agent-enterprise:
+    build: ./agents/enterprise-agent
+    env_file: .env
+    environment:
+      - MCP_TOOL_SERVER=http://mcp-tools:3001
+      - OAUTH_CLIENT_ID=agent-da-prod
+    depends_on:
+      mcp-tools:
+        condition: service_healthy
+    networks:
+      - nhidex
+
+  agent-client-facing:
+    build: ./agents/client-facing-agent
+    env_file: .env
+    environment:
+      - MCP_TOOL_SERVER=http://mcp-tools:3001
+      - WEBHOOK_URL=http://external-crm:4000
+    depends_on:
+      mcp-tools:
+        condition: service_healthy
+    networks:
+      - nhidex
+
+  agent-infra:
+    build: ./agents/infra-agent
+    env_file: .env
+    environment:
+      - MCP_TOOL_SERVER=http://mcp-tools:3001
+      - AWS_REGION=us-east-1
+      - KUBECONFIG=/app/.kube/config
+    depends_on:
+      mcp-tools:
+        condition: service_healthy
+    networks:
+      - nhidex
+
+  agent-shadow:
+    build: ./agents/shadow-agent
+    env_file: .env
+    environment:
+      - LLM_BASE_URL=https://api.anthropic.com/v1
+    depends_on:
+      engine:
+        condition: service_healthy
+    networks:
+      - nhidex
+
+  dashboard:
+    build: ./dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      engine:
+        condition: service_healthy
+    networks:
+      - nhidex
+
+networks:
+  nhidex:
+    driver: bridge
+
+volumes:
+  pgdata:
